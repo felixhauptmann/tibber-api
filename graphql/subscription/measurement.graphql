@@ -1,0 +1,28 @@
+fragment Measurement on LiveMeasurement {
+    timestamp
+
+    power
+    accumulatedConsumption
+    accumulatedConsumptionLastHour
+    accumulatedProduction
+    accumulatedProductionLastHour
+
+    accumulatedCost
+    accumulatedReward
+
+    voltagePhase1
+    voltagePhase2
+    voltagePhase3
+}
+
+subscription LiveMeasurement ($id: ID!) {
+    liveMeasurement (homeId: $id) {
+        ... Measurement
+    }
+}
+
+subscription TestMeasurement ($id: ID!) {
+    testMeasurement (homeId: $id) {
+        ... Measurement
+    }
+}
