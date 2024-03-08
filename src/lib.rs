@@ -1,15 +1,17 @@
+use std::fmt::Debug;
+
 use anyhow::anyhow;
-use graphql_client::reqwest::post_graphql;
-use graphql_client::GraphQLQuery;
+use cynic::http::ReqwestExt;
+use cynic::schema::QueryRoot;
+use cynic::{Id, Operation, QueryFragment, QueryVariables};
 use log::debug;
 use reqwest::Client;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::gql::query;
-use crate::gql::query::ws_subscription_url;
-use crate::gql::query::WSSubscriptionUrl;
-use crate::gql::subscription::LiveMeasurement;
-use crate::gql::subscription::TestMeasurement;
+use crate::gql::query::{Homes, WebsocketSubscriptionUrl};
+use crate::gql::subscription::SubscriptionVariables;
+use crate::gql::subscription::{LiveMeasurementSubscription, TestMeasurementSubscription};
 use crate::subscription::Subscription;
 
 mod gql;
@@ -23,12 +25,13 @@ pub struct TibberClient {
 }
 
 impl TibberClient {
-    async fn fetch_data<T: GraphQLQuery>(
+    async fn fetch_data<T: QueryFragment + Debug + 'static, V: QueryVariables + Serialize>(
         &self,
-        variables: <T as GraphQLQuery>::Variables,
-    ) -> Result<<T as GraphQLQuery>::ResponseData, TibberClientError>
+        variables: V,
+    ) -> Result<T, TibberClientError>
     where
-        <T as GraphQLQuery>::ResponseData: std::fmt::Debug,
+        for<'de> T: Deserialize<'de>,
+        <T as QueryFragment>::SchemaType: QueryRoot,
     {
         let client = Client::builder()
             .user_agent(Self::get_user_agent())
@@ -45,27 +48,24 @@ impl TibberClient {
             .build()
             .map_err(|e| TibberClientError::RequestFailed(e.into()))?;
 
-        let response_body = post_graphql::<T, _>(&client, API_URL, variables)
+        let response_body = client
+            .post(API_URL)
+            .run_graphql(Operation::query(variables))
             .await
             .map_err(|e| TibberClientError::RequestFailed(e.into()))?;
 
         debug!("Got query response: {:?}", response_body);
 
-        let response_data = match response_body.data {
-            Some(d) => d,
-            None => {
-                return Err(TibberClientError::RequestFailed(anyhow!(
-                    "Got empty response!"
-                )))
-            }
+        let Some(response_data) = response_body.data else {
+            return Err(TibberClientError::RequestFailed(anyhow!(
+                "Got empty response!"
+            )));
         };
         Ok(response_data)
     }
 
     async fn get_subscription_url(&self) -> Result<String, TibberClientError> {
-        let r = self
-            .fetch_data::<WSSubscriptionUrl>(ws_subscription_url::Variables)
-            .await?;
+        let r = self.fetch_data::<WebsocketSubscriptionUrl, _>(()).await?;
         r.viewer
             .websocket_subscription_url
             .ok_or(anyhow!("API response malformed!").into())
@@ -85,41 +85,58 @@ impl TibberClient {
             token: token.into(),
         }
     }
+
+    #[must_use]
     pub fn new_demo() -> Self {
         Self {
             token: DEMO_TOKEN.into(),
         }
     }
 
+    /// # Errors
+    ///
+    /// Will return Err if the client fails establish the subscription
     pub async fn subscribe_live_measurement<S: Into<String>>(
         self,
         id: S,
-    ) -> Result<Subscription<LiveMeasurement>, TibberClientError> {
+    ) -> Result<Subscription<LiveMeasurementSubscription>, TibberClientError> {
         Subscription::new(
             self,
-            gql::subscription::live_measurement::Variables { id: id.into() },
+            SubscriptionVariables {
+                home_id: Id::from(id),
+            },
         )
         .await
     }
 
+    /// # Errors
+    ///
+    /// Will return Err if the client fails establish the subscription
     #[deprecated = "Do not use this in production!"]
     pub async fn subscribe_test_measurement<S: Into<String>>(
         self,
         id: S,
-    ) -> Result<Subscription<TestMeasurement>, TibberClientError> {
+    ) -> Result<Subscription<TestMeasurementSubscription>, TibberClientError> {
         Subscription::new(
             self,
-            gql::subscription::test_measurement::Variables { id: id.into() },
+            SubscriptionVariables {
+                home_id: Id::from(id),
+            },
         )
         .await
     }
 
+    /// # Errors
+    ///
+    /// Will return Err if the client fails to fetch the data
     pub async fn query_homes(&self) -> Result<Vec<String>, TibberClientError> {
-        let r = self
-            .fetch_data::<query::Homes>(query::homes::Variables)
-            .await?;
-        Ok(r.viewer.homes.into_iter().flatten().map(|h| h.id).collect())
-        // .ok_or(anyhow!("API response malformed!").into())
+        let r = self.fetch_data::<Homes, _>(()).await?;
+        Ok(r.viewer
+            .homes
+            .into_iter()
+            .flatten()
+            .map(|h| h.id.inner().to_string())
+            .collect())
     }
 }
 

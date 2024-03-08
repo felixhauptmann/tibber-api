@@ -1,0 +1,581 @@
+# This file was generated. Do not edit manually.
+
+schema {
+    query: Query
+    mutation: RootMutation
+    subscription: RootSubscription
+}
+
+interface PageInfo {
+    endCursor: String
+    hasNextPage: Boolean
+    hasPreviousPage: Boolean
+    startCursor: String
+}
+
+type Address {
+    address1: String
+    address2: String
+    address3: String
+    city: String
+    country: String
+    latitude: String
+    longitude: String
+    postalCode: String
+}
+
+type Consumption {
+    "kWh consumed"
+    consumption: Float
+    consumptionUnit: String
+    cost: Float
+    "The cost currency"
+    currency: String
+    from: String!
+    to: String!
+    "Total cost of the consumption"
+    totalCost: Float @deprecated(reason: "use cost instead.")
+    unitCost: Float @deprecated(reason: "use cost instead")
+    unitPrice: Float
+    unitPriceVAT: Float
+}
+
+type ContactInfo {
+    "The email of the corresponding entity"
+    email: String
+    "The mobile phone no of the corresponding entity"
+    mobile: String
+}
+
+type Home {
+    address: Address
+    "The chosen avatar for the home"
+    appAvatar: HomeAvatar!
+    "The nickname given to the home by the user"
+    appNickname: String
+    "Consumption connection"
+    consumption(
+        "Base64-encoded ISO8601 date/time cursor start. Cannot be used in conjunction with `before`"
+        after: String,
+        "Base64-encoded ISO8601 date/time cursor start. Cannot be used in conjunction with `after`"
+        before: String,
+        "Whether to include empty nodes. Default value: false"
+        filterEmptyNodes: Boolean = false,
+        "Take the `n` first results from cursor. Cannot be used in conjunction with `last`"
+        first: Int,
+        "Take the `n` last results from cursor. Cannot be used in conjunction with `first`"
+        last: Int,
+        resolution: EnergyResolution!
+    ): HomeConsumptionConnection
+    "The current/latest subscription related to the home"
+    currentSubscription: Subscription
+    "Home features"
+    features: HomeFeatures
+    "Whether the home has a ventilation system"
+    hasVentilationSystem: Boolean
+    id: ID!
+    "The main fuse size"
+    mainFuseSize: Int
+    meteringPointData: MeteringPointData
+    "The number of people living in the home"
+    numberOfResidents: Int
+    "The registered owner of the house"
+    owner: LegalEntity
+    "The primary form of heating in the household"
+    primaryHeatingSource: HeatingSource
+    "Production connection"
+    production(
+        "Base64-encoded ISO8601 date/time cursor start. Cannot be used in conjunction with `before`"
+        after: String,
+        "Base64-encoded ISO8601 date/time cursor start. Cannot be used in conjunction with `after`"
+        before: String,
+        "Whether to include empty nodes. Default value: false"
+        filterEmptyNodes: Boolean = false,
+        "Take the `n` first results from cursor. Cannot be used in conjunction with `last`"
+        first: Int,
+        "Take the `n` last results from cursor. Cannot be used in conjunction with `first`"
+        last: Int,
+        resolution: EnergyResolution!
+    ): HomeProductionConnection
+    "The size of the home in square meters"
+    size: Int
+    "All historic subscriptions related to the home"
+    subscriptions: [Subscription]!
+    "The time zone the home resides in"
+    timeZone: String!
+    "The type of home."
+    type: HomeType!
+}
+
+type HomeConsumptionConnection {
+    edges: [HomeConsumptionEdge]
+    nodes: [Consumption]
+    pageInfo: HomeConsumptionPageInfo!
+}
+
+type HomeConsumptionEdge {
+    cursor: String!
+    node: Consumption!
+}
+
+type HomeConsumptionPageInfo implements PageInfo {
+    "The number of elements in the list"
+    count: Int
+    "The currency of the page"
+    currency: String
+    "The global ID of the last element in the list"
+    endCursor: String
+    "Page energy cost"
+    energyCost: Float @deprecated(reason: "redundant")
+    "Number of entries that have been filtered from result set due to empty nodes"
+    filtered: Int!
+    "True if further pages are available"
+    hasNextPage: Boolean
+    "True if previous pages are available"
+    hasPreviousPage: Boolean
+    "The global ID of the first element in the list"
+    startCursor: String
+    "Total consumption for page"
+    totalConsumption: Float
+    "Page total cost"
+    totalCost: Float
+}
+
+type HomeFeatures {
+    "'true' if Tibber Pulse or Watty device is paired at home"
+    realTimeConsumptionEnabled: Boolean
+}
+
+type HomeProductionConnection {
+    edges: [HomeProductionEdge]
+    nodes: [Production]
+    pageInfo: HomeProductionPageInfo!
+}
+
+type HomeProductionEdge {
+    cursor: String!
+    node: Production!
+}
+
+type HomeProductionPageInfo implements PageInfo {
+    "The number of elements in the list"
+    count: Int
+    "The currency of the page"
+    currency: String
+    "The global ID of the last element in the list"
+    endCursor: String
+    "Number of entries that have been filtered from result set due to empty nodes"
+    filtered: Int!
+    "True if further pages are available"
+    hasNextPage: Boolean
+    "True if previous pages are available"
+    hasPreviousPage: Boolean
+    "The global ID of the first element in the list"
+    startCursor: String
+    "Page total production"
+    totalProduction: Float
+    "Page total profit"
+    totalProfit: Float
+}
+
+type LegalEntity {
+    "Address information for the entity"
+    address: Address
+    "Contact information of the entity"
+    contactInfo: ContactInfo
+    "First/Christian name of the entity"
+    firstName: String
+    id: ID!
+    "'true' if the entity is a company"
+    isCompany: Boolean
+    "The primary language of the entity"
+    language: String
+    "Last name of the entity"
+    lastName: String
+    "Middle name of the entity"
+    middleName: String
+    "Full name of the entity"
+    name: String!
+    "Organization number - only populated if entity is a company (isCompany=true)"
+    organizationNo: String
+}
+
+type LiveMeasurement {
+    "kWh consumed since midnight"
+    accumulatedConsumption: Float!
+    "kWh consumed since since last hour shift"
+    accumulatedConsumptionLastHour: Float!
+    "Accumulated cost since midnight; requires active Tibber power deal; includes VAT (where applicable)"
+    accumulatedCost: Float
+    "net kWh produced since midnight"
+    accumulatedProduction: Float!
+    "net kWh produced since last hour shift"
+    accumulatedProductionLastHour: Float!
+    "Accumulated reward since midnight; requires active Tibber power deal"
+    accumulatedReward: Float
+    "Average consumption since midnight (Watt)"
+    averagePower: Float!
+    "Currency of displayed cost; requires active Tibber power deal"
+    currency: String
+    "Current on L1; on Kaifa and Aidon meters the value is not part of every HAN data frame therefore the value is null at timestamps with second value other than 0, 10, 20, 30, 40, 50. There can be other deviations based on concrete meter firmware."
+    currentL1: Float
+    "Current on L2; on Kaifa and Aidon meters the value is not part of every HAN data frame therefore the value is null at timestamps with second value other than 0, 10, 20, 30, 40, 50. There can be other deviations based on concrete meter firmware. Value is always null for single phase meters."
+    currentL2: Float
+    "Current on L3; on Kaifa and Aidon meters the value is not part of every HAN data frame therefore the value is null at timestamps with second value other than 0, 10, 20, 30, 40, 50. There can be other deviations based on concrete meter firmware. Value is always null for single phase meters."
+    currentL3: Float
+    "Current on phase 1; on Kaifa and Aidon meters the value is not part of every HAN data frame therefore the value is null at timestamps with second value other than 0, 10, 20, 30, 40, 50. There can be other deviations based on concrete meter firmware."
+    currentPhase1: Float @deprecated(reason: "Replaced by currentL1.")
+    "Current on phase 2; on Kaifa and Aidon meters the value is not part of every HAN data frame therefore the value is null at timestamps with second value other than 0, 10, 20, 30, 40, 50. There can be other deviations based on concrete meter firmware. Value is always null for single phase meters."
+    currentPhase2: Float @deprecated(reason: "Replaced by currentL2.")
+    "Current on phase 3; on Kaifa and Aidon meters the value is not part of every HAN data frame therefore the value is null at timestamps with second value other than 0, 10, 20, 30, 40, 50. There can be other deviations based on concrete meter firmware. Value is always null for single phase meters."
+    currentPhase3: Float @deprecated(reason: "Replaced by currentL3.")
+    "Last meter active import register state (kWh)"
+    lastMeterConsumption: Float
+    "Last meter active export register state (kWh)"
+    lastMeterProduction: Float
+    "Peak consumption since midnight  (Watt)"
+    maxPower: Float!
+    "Max net production since midnight (Watt)"
+    maxPowerProduction: Float
+    "Min consumption since midnight (Watt)"
+    minPower: Float!
+    "Min net production since midnight (Watt)"
+    minPowerProduction: Float
+    "Consumption at the moment (Watt)"
+    power: Float!
+    "Power factor (active power / apparent power)"
+    powerFactor: Float
+    "Net production (A-) at the moment (Watt)"
+    powerProduction: Float
+    "Net reactive production (Q-) at the moment (kVAr)"
+    powerProductionReactive: Float
+    "Reactive consumption (Q+) at the moment (kVAr)"
+    powerReactive: Float
+    "Device signal strength (Pulse - dB; Watty - percent)"
+    signalStrength: Int
+    "Timestamp when usage occurred"
+    timestamp: String!
+    "Voltage on phase 1; on Kaifa and Aidon meters the value is not part of every HAN data frame therefore the value is null at timestamps with second value other than 0, 10, 20, 30, 40, 50. There can be other deviations based on concrete meter firmware."
+    voltagePhase1: Float
+    "Voltage on phase 2; on Kaifa and Aidon meters the value is not part of every HAN data frame therefore the value is null at timestamps with second value other than 0, 10, 20, 30, 40, 50. There can be other deviations based on concrete meter firmware. Value is always null for single phase meters."
+    voltagePhase2: Float
+    "Voltage on phase 3; on Kaifa and Aidon meters the value is not part of every HAN data frame therefore the value is null at timestamps with second value other than 0, 10, 20, 30, 40, 50. There can be other deviations based on concrete meter firmware. Value is always null for single phase meters."
+    voltagePhase3: Float
+}
+
+type MeterReadingResponse {
+    homeId: ID!
+    reading: Int!
+    time: String
+}
+
+type MeteringPointData {
+    "The metering point ID of the home"
+    consumptionEan: String
+    "The eltax type of the home (only relevant for Swedish homes)"
+    energyTaxType: String
+    "The estimated annual consumption as reported by grid company"
+    estimatedAnnualConsumption: Int
+    "The grid area the home/metering point belongs to"
+    gridAreaCode: String
+    "The grid provider of the home"
+    gridCompany: String
+    "The price area the home/metering point belongs to"
+    priceAreaCode: String
+    "The metering point ID of the production"
+    productionEan: String
+    "The VAT type of the home (only relevant for Norwegian homes)"
+    vatType: String
+}
+
+type Price {
+    "The price currency"
+    currency: String!
+    "Nord Pool spot price"
+    energy: Float
+    "The price level compared to recent price values"
+    level: PriceLevel
+    "The start time of the price"
+    startsAt: String
+    "The tax part of the price (guarantee of origin certificate, energy tax (Sweden only) and VAT)"
+    tax: Float
+    "The total price (energy + taxes)"
+    total: Float
+}
+
+type PriceInfo {
+    "The energy price right now"
+    current: Price
+    "Range of prices relative to before/after arguments"
+    range(
+        "Base64-encoded ISO8601 date/time cursor position. Cannot be used in conjunction with `before`"
+        after: String,
+        "Base64-encoded ISO8601 date/time cursor position. Cannot be used in conjunction with `after`"
+        before: String,
+        "Take the `n` first results from cursor. Cannot be used in conjunction with `last`"
+        first: Int,
+        "Take the `n` last results from cursor. Cannot be used in conjunction with `first`"
+        last: Int,
+        "Temporal resolution"
+        resolution: PriceResolution!
+    ): SubscriptionPriceConnection
+    "The hourly prices of the current day"
+    today: [Price]!
+    "The hourly prices of the upcoming day"
+    tomorrow: [Price]!
+}
+
+type PriceRating {
+    "The daily prices of today and the previous 30 days"
+    daily: PriceRatingType!
+    "The hourly prices of today, the previous 7 days, and tomorrow"
+    hourly: PriceRatingType!
+    "The monthly prices of this month and the previous 31 months"
+    monthly: PriceRatingType!
+    "The different 'high'/'low' price breakpoints (market dependent)"
+    thresholdPercentages: PriceRatingThresholdPercentages!
+}
+
+type PriceRatingEntry {
+    "The percentage difference compared to the trailing price average (1 day for 'hourly', 30 days for 'daily' and 32 months for 'monthly')"
+    difference: Float!
+    "Nord Pool spot price"
+    energy: Float!
+    "The price level compared to recent price values (calculated using 'difference' and 'priceRating.thresholdPercentages')"
+    level: PriceRatingLevel!
+    "The tax part of the price (guarantee of origin certificate, energy tax (Sweden only) and VAT)"
+    tax: Float!
+    "The start time of the price"
+    time: String!
+    "The total price (incl. tax)"
+    total: Float!
+}
+
+type PriceRatingThresholdPercentages {
+    "The percentage difference when the price is considered to be 'high' (market dependent)"
+    high: Float!
+    "The percentage difference when the price is considered to be 'low' (market dependent)"
+    low: Float!
+}
+
+type PriceRatingType {
+    "The price currency"
+    currency: String!
+    "The individual price entries aggregated by hourly/daily/monthly values"
+    entries: [PriceRatingEntry!]!
+    "Highest Nord Pool spot price over the time period"
+    maxEnergy: Float!
+    "Highest total price (incl. tax) over the time period"
+    maxTotal: Float!
+    "Lowest Nord Pool spot price over the time period"
+    minEnergy: Float!
+    "Lowest total price (incl. tax) over the time period"
+    minTotal: Float!
+}
+
+type Production {
+    "The cost currency"
+    currency: String
+    from: String!
+    "kWh produced"
+    production: Float
+    productionUnit: String
+    "Total profit of the production"
+    profit: Float
+    to: String!
+    unitPrice: Float
+    unitPriceVAT: Float
+}
+
+type PushNotificationResponse {
+    pushedToNumberOfDevices: Int!
+    successful: Boolean!
+}
+
+type Query {
+    "This contains data about the logged-in user"
+    viewer: Viewer!
+}
+
+type RootMutation {
+    "Send meter reading for home (only available for Norwegian users)"
+    sendMeterReading(input: MeterReadingInput!): MeterReadingResponse!
+    "Send notification to Tibber app on registered devices"
+    sendPushNotification(input: PushNotificationInput!): PushNotificationResponse!
+    "Update home information"
+    updateHome(input: UpdateHomeInput!): Home!
+}
+
+type RootSubscription {
+    "Subscribe to real-time measurement stream from Pulse or Watty device"
+    liveMeasurement(homeId: ID!): LiveMeasurement
+    "Subscribe to test stream"
+    testMeasurement(homeId: ID!): LiveMeasurement
+}
+
+type Subscription {
+    id: ID!
+    "Price information related to the subscription"
+    priceInfo: PriceInfo
+    "Price information related to the subscription"
+    priceRating: PriceRating
+    "The current status of the subscription"
+    status: String
+    statusReason: String @deprecated(reason: "no longer available.")
+    "The owner of the subscription"
+    subscriber: LegalEntity!
+    "The time the subscription started"
+    validFrom: String
+    "The time the subscription ended"
+    validTo: String
+}
+
+type SubscriptionPriceConnection {
+    edges: [SubscriptionPriceEdge]!
+    nodes: [Price]!
+    pageInfo: SubscriptionPriceConnectionPageInfo!
+}
+
+type SubscriptionPriceConnectionPageInfo implements PageInfo {
+    count: Int!
+    currency: String!
+    endCursor: String
+    hasNextPage: Boolean
+    hasPreviousPage: Boolean
+    maxEnergy: Float
+    maxTotal: Float
+    minEnergy: Float
+    minTotal: Float
+    precision: String
+    resolution: String!
+    startCursor: String
+}
+
+type SubscriptionPriceEdge {
+    "The global ID of the element"
+    cursor: String!
+    "A single price node"
+    node: Price
+}
+
+type Viewer {
+    "The type of account for the logged-in user."
+    accountType: [String!]!
+    "Single home by its ID"
+    home(id: ID!): Home!
+    "All homes visible to the logged-in user"
+    homes: [Home]!
+    login: String
+    name: String
+    "Unique user identifier"
+    userId: String
+    "URL for websocket subscriptions"
+    websocketSubscriptionUrl: String
+}
+
+enum AppScreen {
+    COMPARISON
+    CONSUMPTION
+    CUSTOMER_PROFILE
+    DISAGGREGATION
+    HOME
+    HOME_PROFILE
+    INVOICES
+    METER_READING
+    NOTIFICATIONS
+    REPORTS
+}
+
+enum EnergyResolution {
+    ANNUAL
+    DAILY
+    HOURLY
+    MONTHLY
+    WEEKLY
+}
+
+enum HeatingSource {
+    AIR2AIR_HEATPUMP
+    AIR2WATER_HEATPUMP
+    DISTRICT_HEATING
+    ELECTRICITY
+    ELECTRIC_BOILER
+    GROUND
+    OTHER
+}
+
+enum HomeAvatar {
+    APARTMENT
+    CASTLE
+    COTTAGE
+    FLOORHOUSE1
+    FLOORHOUSE2
+    FLOORHOUSE3
+    ROWHOUSE
+}
+
+enum HomeType {
+    APARTMENT
+    COTTAGE
+    HOUSE
+    ROWHOUSE
+}
+
+"Price level based on trailing price average (3 days for hourly values and 30 days for daily values)"
+enum PriceLevel {
+    "The price is greater than 60 % and smaller or equal to 90 % compared to average price."
+    CHEAP
+    "The price is greater or equal to 115 % and smaller than 140 % compared to average price."
+    EXPENSIVE
+    "The price is greater than 90 % and smaller than 115 % compared to average price."
+    NORMAL
+    "The price is smaller or equal to 60 % compared to average price."
+    VERY_CHEAP
+    "The price is greater or equal to 140 % compared to average price."
+    VERY_EXPENSIVE
+}
+
+enum PriceRatingLevel {
+    "The price is within the range of what is considered being high (market dependent; see 'priceRating.thresholdPercentages' for limits)"
+    HIGH
+    "The price is within the range of what is considered being low (market dependent; see 'priceRating.thresholdPercentages' for limits)"
+    LOW
+    "The price is within the range of what is considered being normal (market dependent; see 'priceRating.thresholdPercentages' for limits)"
+    NORMAL
+}
+
+enum PriceResolution {
+    DAILY
+    HOURLY
+}
+
+input MeterReadingInput {
+    homeId: ID!
+    reading: Int!
+    time: String
+}
+
+input PushNotificationInput {
+    message: String!
+    screenToOpen: AppScreen
+    title: String
+}
+
+input UpdateHomeInput {
+    "The chosen avatar for the home"
+    appAvatar: HomeAvatar
+    appNickname: String
+    "Whether the home has a ventilation system"
+    hasVentilationSystem: Boolean
+    homeId: ID!
+    "The main fuse size"
+    mainFuseSize: Int
+    "The number of people living in the home"
+    numberOfResidents: Int
+    "The primary form of heating in the household"
+    primaryHeatingSource: HeatingSource
+    "The size of the home in square meters"
+    size: Int
+    "The type of home."
+    type: HomeType
+}

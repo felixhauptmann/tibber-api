@@ -1,5 +1,0 @@
-query WSSubscriptionUrl {
-    viewer {
-        websocketSubscriptionUrl
-    }
-}
