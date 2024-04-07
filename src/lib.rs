@@ -11,7 +11,7 @@ use thiserror::Error;
 
 use crate::gql::query::{Homes, WebsocketSubscriptionUrl};
 use crate::gql::subscription::SubscriptionVariables;
-use crate::gql::subscription::{LiveMeasurementSubscription, TestMeasurementSubscription};
+pub use crate::gql::subscription::{LiveMeasurementSubscription, TestMeasurementSubscription};
 use crate::subscription::Subscription;
 
 mod gql;
