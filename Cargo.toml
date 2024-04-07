@@ -6,20 +6,20 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cynic = { version = "3.4.3", features = ["http-reqwest"] }
-graphql-ws-client = { version = "0.8.0-rc.2", features = ["async-tungstenite", "client-cynic"] }
-serde = "1.0.197"
-serde_json = "1.0.114"
+cynic = { version = "3.5", features = ["http-reqwest"] }
+graphql-ws-client = { version = "0.8", features = ["async-tungstenite", "client-cynic"] }
+serde = "1.0"
+serde_json = "1.0"
 async-tungstenite = { version = "0.25", features = ["tokio-runtime", "tokio-native-tls"] }
-reqwest = "0.11.24"
-futures = "0.3.30"
-thiserror = "1.0.57"
-anyhow = "1.0.80"
-log = "0.4.21"
+reqwest = "0.12"
+futures = "0.3"
+thiserror = "1.0"
+anyhow = "1.0"
+log = "0.4"
 
 [dev-dependencies]
 tokio = { version = "1.36.0", features = ["full"] }
 test-log = "0.2.15"
 
 [build-dependencies]
-cynic-codegen = "3.4.3"
+cynic-codegen = "3.5.1"

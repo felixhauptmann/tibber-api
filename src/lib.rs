@@ -4,7 +4,7 @@ use anyhow::anyhow;
 use cynic::http::ReqwestExt;
 use cynic::schema::QueryRoot;
 use cynic::{Id, Operation, QueryFragment, QueryVariables};
-use log::debug;
+use log::trace;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -54,7 +54,7 @@ impl TibberClient {
             .await
             .map_err(|e| TibberClientError::RequestFailed(e.into()))?;
 
-        debug!("Got query response: {:?}", response_body);
+        trace!("Got query response: {:?}", response_body);
 
         let Some(response_data) = response_body.data else {
             return Err(TibberClientError::RequestFailed(anyhow!(
